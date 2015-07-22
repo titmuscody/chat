@@ -1,0 +1,12 @@
+doctype html
+html(lang="en")
+  head
+    link(href="/view/general.css" type="text/css" rel="stylesheet")
+    title Bank
+  body
+    form(method="POST", action="/user")
+      label(for="username") Username:
+      input#username(type="text" name="username")
+      label(for="password") Password:
+      input#password(type="password" name="password")
+      input(type="submit")#submit-button

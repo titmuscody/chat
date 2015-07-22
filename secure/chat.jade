@@ -1,0 +1,18 @@
+doctype html
+html(lang="en")
+  head
+    link(href="/view/general.css" type="text/css" rel="stylesheet")
+    title Bank
+  script.
+    conn = new WebSocket("ws://" + window.location.host + "/sock");
+    conn.onmessage = function(evn){alert(evn.data);document.getElementById("chat").innerHTML += evn.data + '\n';};
+    conn.onclose = function(evn){alert("conn closed");};
+    function send(){
+    box = document.getElementById("message");
+    conn.send(box.value);
+    }
+  body
+    .content
+      div#chat 
+      input#message.chat(type="text")
+      button(onclick="send()") Send

@@ -36,13 +36,13 @@ func makeUserReference(username string) string {
 func GetUserKey(username string) string {
     var key string
     database.QueryRow("select key from users where username=$1", username).Scan(&key)
-    return key
+	return key
 }
 
 func GetUser(sessionId string) string {
 
     var key string
-    database.QueryRow("select username from users, sessions where username=owner").Scan(&key)
+    database.QueryRow("select username from users where sessionId=$1", sessionId).Scan(&key)
     return key
 }
 
@@ -65,7 +65,7 @@ func GetUserHash(username string) string {
 }
 
 func CreateSessionId(username string) string {
-    stmt, err := database.Prepare("UPDATE sessions SET id=$1, expire=$2 WHERE owner IN (SELECT id FROM users WHERE username=$3)")
+    stmt, err := database.Prepare("UPDATE users SET sessionId=$1, expire=$2 WHERE username=$3")
     if err != nil {
         panic(err)
     }
@@ -79,7 +79,7 @@ func CreateSessionId(username string) string {
     return strconv.Itoa(newId)
 }
 
-func CreateUser(username, password string) string {
+func CreateUser(username, password string) bool {
 	stmt, err := database.Prepare("INSERT INTO users (username, password) VALUES ($1, $2)")
     if err != nil {
         panic(err)
@@ -88,24 +88,24 @@ func CreateUser(username, password string) string {
     if err != nil {
         panic(err)
     }
-	return username
+	return true
 }
 
 func Validate(id string) string {
     var username string
     var expire time.Time
-    database.QueryRow("select users.username, sessions.expire from users, sessions where users.id=sessions.owner and sessions.id=$1;", id).Scan(&username, &expire)
-    t := time.Since(expire)
-    fmt.Println(time.Now().UTC())
-    fmt.Println(t.Minutes())
-    if t.Minutes() > 15 {
-        return ""
-    }
+    database.QueryRow("select username, expire from users where sessionid=$1;", id).Scan(&username, &expire)
+    //t := time.Since(expire)
+    //fmt.Println(time.Now().UTC())
+    //fmt.Println(t.Minutes())
+    //if t.Minutes() > 15 {
+    //    return ""
+    //}
     return username
 }
 
 func refreshUserLogin(username string) {
-    stmt, err := database.Prepare("UPDATE sessions SET expire=$1 WHERE owner IN (SELECT id FROM users WHERE username=$2);")
+    stmt, err := database.Prepare("UPDATE sessions SET expire=$1 WHERE username=$2;")
     if err != nil {
         panic(err)
     }

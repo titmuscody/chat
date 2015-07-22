@@ -6,3 +6,10 @@ div {
     margin-right:auto;
     width:20%;
 }
+
+#chat {
+	overflow: scroll;
+	width: 200px;
+	height: 120px;
+
+}
